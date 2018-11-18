@@ -2,20 +2,31 @@ package com.example.elati.googlemaptp;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -49,10 +60,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        // Add a marker in Paris and move the camera
+//        LatLng paris = new LatLng(48.866667, 2.333333);
+//        mMap.addMarker(new MarkerOptions().position(paris).title("Marker in Paris"));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(paris));
 
         enableMyLocation();
     }
@@ -88,6 +99,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     enableMyLocation();
                     break;
                 }
+        }
+    }
+
+
+    public void onClick(View v){
+        switch(v.getId()){
+            case R.id.buttonSearch:
+                EditText addressField = (EditText) findViewById(R.id.textSearch);
+                String address = addressField.getText().toString();
+
+                List<Address> adressList;
+                MarkerOptions userMarkerOptions = new MarkerOptions();
+
+                if(!TextUtils.isEmpty(address)){
+                    Geocoder geocoder = new Geocoder(this);
+
+                    try{
+                        adressList = geocoder.getFromLocationName(address, 6);
+
+                        if(adressList != null && adressList.size() != 0){
+
+                            Address userAddress = adressList.get(0);
+                            LatLng latLng = new LatLng(userAddress.getLatitude(), userAddress.getLongitude());
+                            mMap.clear();
+                            userMarkerOptions.position(latLng);
+                            userMarkerOptions.title(address);
+                            userMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
+                            mMap.addMarker(userMarkerOptions);
+                            //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 3));
+                        }
+                        else{
+                            Toast.makeText(this, "Lieu non trouvé ...", Toast.LENGTH_LONG).show();
+                        }
+                    }catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else{
+                    Toast.makeText(this, "Entrez le lieu de votre choix, s'il vous plaît", Toast.LENGTH_LONG).show();
+                }
+                break;
         }
     }
 }
