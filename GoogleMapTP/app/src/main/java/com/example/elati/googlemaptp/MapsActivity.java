@@ -59,9 +59,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Paris and move the camera
-//        LatLng paris = new LatLng(48.866667, 2.333333);
-//        mMap.addMarker(new MarkerOptions().position(paris).title("Marker in Paris"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(paris));
+        LatLng paris = new LatLng(48.866667, 2.333333);
+        mMap.addMarker(new MarkerOptions().position(paris).title("Marker in Paris"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(paris));
 
         // Active le button en cas de validation de permission
         enableMyLocation();
@@ -139,8 +139,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             userMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
                             // On ajoute le marker dans le map
                             mMap.addMarker(userMarkerOptions);
-                            // On fixe le camera vers le marker créé avec le zoom niveau 3
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 3));
+                            // On fixe le camera vers le marker créé avec le zoom niveau 13
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
                         }
                         else{
                             Toast.makeText(this, "Lieu non trouvé ...", Toast.LENGTH_LONG).show();
