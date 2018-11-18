@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -15,12 +14,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -65,6 +63,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        mMap.addMarker(new MarkerOptions().position(paris).title("Marker in Paris"));
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(paris));
 
+        // Active le button en cas de validation de permission
         enableMyLocation();
     }
 
@@ -73,11 +72,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * Permet d'activer le button localisation en cas du permission de localisation accordé
      */
     private void enableMyLocation() {
+        // Véfication si la permission de location est accordée
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
+            // Active l'affichage du button localisation
             mMap.setMyLocationEnabled(true);
         } else {
+            // On redemande encore la permission au utilisateur lors du prochain ouverture de l'appli
             ActivityCompat.requestPermissions(this, new String[]
                             {Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_LOCATION_PERMISSION);
@@ -96,6 +98,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (grantResults.length > 0
                         && grantResults[0]
                         == PackageManager.PERMISSION_GRANTED) {
+                    // Activation de la location en fonction de la permission
                     enableMyLocation();
                     break;
                 }
@@ -106,28 +109,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onClick(View v){
         switch(v.getId()){
             case R.id.buttonSearch:
+                // On récupère le lieu (addresse)
                 EditText addressField = (EditText) findViewById(R.id.textSearch);
                 String address = addressField.getText().toString();
 
                 List<Address> adressList;
                 MarkerOptions userMarkerOptions = new MarkerOptions();
-
+                // Vérifie si le champ de saisie n'est pas vide
                 if(!TextUtils.isEmpty(address)){
+                    // Moteur de recherche pour les adresses
                     Geocoder geocoder = new Geocoder(this);
 
                     try{
-                        adressList = geocoder.getFromLocationName(address, 6);
+                        // On récupère seulement la 1ère adresse recherchée parmi les adresses recherchées
+                        adressList = geocoder.getFromLocationName(address, 1);
 
+                        // On vérifie si la liste des adresses ne sont pas vides et nulles.
                         if(adressList != null && adressList.size() != 0){
 
+                            // On extrait le 1er adresse de la liste des adresses recherchées
                             Address userAddress = adressList.get(0);
+                            // On définit l'attitude et la longitude de l'adresse
                             LatLng latLng = new LatLng(userAddress.getLatitude(), userAddress.getLongitude());
+                            // On vide toutes les données de mMap (par exemple enlever tous les markers)
                             mMap.clear();
+                            // On définit le marker avec l'altitude, la longitude de l'adresse, le titre, l'icône
                             userMarkerOptions.position(latLng);
                             userMarkerOptions.title(address);
                             userMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
+                            // On ajoute le marker dans le map
                             mMap.addMarker(userMarkerOptions);
-                            //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                            // On fixe le camera vers le marker créé avec le zoom niveau 3
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 3));
                         }
                         else{
